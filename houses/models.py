@@ -15,6 +15,9 @@ class House(models.Model):
         default=True, help_text= "Does this house allow pets?"
     ) # CheckBox
 
+    # ForeignKey 설정
+    owner = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    
     # house class의 string method의 형태를 설정한다.
     def __str__(self):
         return self.name 
