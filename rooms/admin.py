@@ -3,8 +3,9 @@ from .models import Room, Amenity
 
 @admin.register(Room) # Room Model 의 admin을 컨트롤 한다.
 class RoomAdmin(admin.ModelAdmin):
-    list_display = ("name", "price", "kind", "owner", "created_at", "updated_at",)
-    list_filter = ("country", "city", "pet_friendly", "kind", "amenities", "created_at", "updated_at",)
+    list_display = ("name", "price", "kind", "total_amenities", "owner", "created_at",)
+    list_filter = ("country", "city", "pet_friendly", "kind", "amenities", "created_at",)
+
 
 @admin.register(Amenity)
 class AmenityAdmin(admin.ModelAdmin):
