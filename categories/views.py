@@ -1,10 +1,27 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Category
-from .serializer import CategorySerializer
+from .serializers import CategorySerializer
+
+@api_view(["GET", "POST"])
+def categories(request):
+
+    if request.method == "GET":
+        all_categories = Category.objects.all()
+        serializer = CategorySerializer(all_categories, many=True)
+        return Response(serializer.data,)
+    elif request.method == "POST":
+        serializer = CategorySerializer(data=request.data)
+        # print(serializer.is_valid()) # data가 유효한지 확인할 수 있다.
+        # print(serializer.errors) # Error 를 확인할 수 있다.
+        if serializer.is_valid():
+            return Response({""})
+        else:
+            return Response(serializer.errors)
+        
 
 @api_view()
-def categories(request):
-    all_categories = Category.objects.all()
-    serializer = CategorySerializer(all_categories, many=True)
-    return Response(serializer.data,)
+def category(request, pk):
+    category = Category.objects.get(pk=pk)
+    serializer = CategorySerializer(category)
+    return Response(serializer.data)
