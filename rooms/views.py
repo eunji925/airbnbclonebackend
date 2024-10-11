@@ -1,8 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.status import HTTP_204_NO_CONTENT
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, NotAuthenticated, ParseError
 from .models import Amenity, Room
+from categories.models import Category
 from .serializers import AmenitySerializer, RoomListSerializer, RoomDetailSerializer
 
 # /api/v1/rooms/amenities
@@ -60,6 +61,31 @@ class Rooms(APIView):
         all_rooms = Room.objects.all()
         serializer = RoomListSerializer(all_rooms, many = True,)
         return Response(serializer.data)
+    
+    def post(self, request):
+        if request.user.is_authenticated:
+            serializer = RoomDetailSerializer(data=request.data)
+            if serializer.is_valid():
+                # categroy pk 여부 확인
+                category_pk = request.data.get("category is required.")
+                # category 가 없으면 error 발생
+                if not category_pk:
+                    raise ParseError("Category")
+                try:
+                    category = Category.objects.get(pk = category_pk)
+                    # category 종류가 맞지 않으면 error 발생
+                    if category.kind == Category.CategoryKindChoices.EXPERIENCES:
+                        raise ParseError("The category kind should be 'rooms'.")
+                except category.DoesNotExist:
+                    raise ParseError("Category not found.")
+                #category 정보 넘기기
+                room = serializer.save(owner=request.user, category = category)
+                serializer = RoomDetailSerializer(room)
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors)
+        else:
+            raise NotAuthenticated
 
 
 class RoomDetail(APIView):
